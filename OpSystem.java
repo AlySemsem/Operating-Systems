@@ -11,7 +11,7 @@ public class OpSystem {
     public static void main(String[] args) throws IOException {
         OpSystem os = new OpSystem();
         Interpeter.readFile("Program_1.txt", os);
-        //Interpeter.readFile("Program_2.txt", os);
+        Interpeter.readFile("Program_2.txt", os);
         //Interpeter.readFile("Program_3.txt", os);
         Scheduler sch = new Scheduler();
         sch.run(os);

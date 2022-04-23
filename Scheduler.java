@@ -21,7 +21,7 @@ public class Scheduler {
                         case "assign": i.assign(i.parameters.get(1), i.parameters.get(2), p);break;
                         case "print": i.print(i.parameters.get(1));break;
                         case "printFromTo": i.printFromTo(i.parameters.get(1), i.parameters.get(2), p);break;
-                        case "writeFile": i.writeFile(i.parameters.get(1), i.parameters.get(2));break;
+                        case "writeFile": i.writeFile(i.parameters.get(1), i.parameters.get(2), p);break;
                         case "readFile": Interpeter.readFile(i.parameters.get(1), os);break;
                         default: break;
                     }

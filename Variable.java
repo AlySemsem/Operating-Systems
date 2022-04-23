@@ -1,7 +1,7 @@
 public class Variable {
     String name;
-    int value;
-    public Variable(String name, int value){
+    Object value;
+    public Variable(String name, Object value){
         this.name = name;
         this.value = value;
     }

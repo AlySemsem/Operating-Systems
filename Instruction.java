@@ -32,45 +32,55 @@ public class Instruction {
     public void print(String s){
         System.out.println(s);
     }
-    public void writeFile(String fileName ,String x) throws IOException{
-        File file = new File(fileName);
-        file.createNewFile();
-        FileWriter w = new FileWriter(file);
-        w.write(x);
-        w.close();
+    public void writeFile(String fileName ,String data, Program p) throws IOException{
+        for(Variable v : p.getVariables()){
+            if(v.name.equals(fileName)){
+                File file = new File((String) v.value);
+                file.createNewFile();
+                for(Variable z : p.getVariables()){
+                    FileWriter w = new FileWriter(file);
+                    w.write(z.value.toString());
+                    w.close();
+                }
+            }
+        }
     }
     public void printFromTo(String x, String y, Program p){
-        int a,b;
-        boolean flagx = false;
         for(Variable v : p.getVariables()){
-            if(v.name.equals(x) || flagx){
-                a = v.value;
-                System.out.println(a);
-                flagx = true;
-                if(v.name.equals(y)){
-                    b = v.value;
-                    //System.out.println(b);
-                    for(int i = a+1; i < b; i++){
-                        System.out.println("hi");
+            if(v.name.equals(x)){
+                int a = (int) v.value;
+                for(Variable z : p.getVariables()){
+                    if(z.name.equals(y)){
+                        int b = (int) z.value;
+                        for(int i = a+1; i < b; i++){
+                            System.out.println(i);
+                        }
+                        break;
                     }
-                    break;
                 }
             }
         }
     }
     public void assign(String s, Object o, Program p){
-        int x;
+        Object x;
         if(o instanceof Integer){
             x = (int)o;
         }
-        else{
+        else if(o.toString().equals("input")){
             Scanner sc = new Scanner(System.in);
             System.out.println("Please enter a value: ");
 
-            x = sc.nextInt();
+            x = sc.nextLine();
+            if(((String) x).matches("\\d+")){
+                x = Integer.parseInt((String) x);
+            }else{
+                x = x.toString();
+            }
+        }else{
+            x = o.toString();
         }
         Variable v = new Variable(s, x);
-            p.getVariables().add(v);
+        p.getVariables().add(v);
     }
     public void sysCall(OpSystem os){
         Scheduler sch = new Scheduler();
