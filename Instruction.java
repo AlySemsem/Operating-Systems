@@ -18,6 +18,7 @@ public class Instruction {
             m.setUserOutput(true);
         else
             m.setAccessingFile(true);
+        System.out.println("semwait");
     }
     public void semSignal(String s){
         if(s.equals("userInput"))
@@ -26,32 +27,53 @@ public class Instruction {
             m.setUserOutput(false);
         else
             m.setAccessingFile(false);
+        System.out.println("semsignal");
     }
     public void print(String s){
         System.out.println(s);
     }
-    public void writeFile(File file, String x) throws IOException{
+    public void writeFile(String fileName ,String x) throws IOException{
+        File file = new File(fileName);
+        file.createNewFile();
         FileWriter w = new FileWriter(file);
         w.write(x);
         w.close();
     }
-    public void printFromTo(int x, int y){
-        for(int i = x; i > y; i++){
-            System.out.println(i);
+    public void printFromTo(String x, String y, Program p){
+        int a,b;
+        boolean flagx = false;
+        for(Variable v : p.getVariables()){
+            if(v.name.equals(x) || flagx){
+                a = v.value;
+                System.out.println(a);
+                flagx = true;
+                if(v.name.equals(y)){
+                    b = v.value;
+                    //System.out.println(b);
+                    for(int i = a+1; i < b; i++){
+                        System.out.println("hi");
+                    }
+                    break;
+                }
+            }
         }
     }
-    public int assign(Object o){
+    public void assign(String s, Object o, Program p){
+        int x;
         if(o instanceof Integer){
-            int x = (int)o;
-            return x;
+            x = (int)o;
         }
         else{
             Scanner sc = new Scanner(System.in);
             System.out.println("Please enter a value: ");
 
-            int value = sc.nextInt();
-            sc.close();
-            return value;
+            x = sc.nextInt();
         }
+        Variable v = new Variable(s, x);
+            p.getVariables().add(v);
+    }
+    public void sysCall(OpSystem os){
+        Scheduler sch = new Scheduler();
+        os.programs.get(0).instructions.get(0).parameters.get(0);
     }
 }

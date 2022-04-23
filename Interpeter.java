@@ -4,7 +4,8 @@ public class Interpeter{
 
     //static Program program = new Program();
     
-    public static void readFile(File file, OpSystem os) throws IOException{
+    public static void readFile(String fileName, OpSystem os) throws IOException{
+        File file = new File(fileName);
         BufferedReader br = new BufferedReader(new FileReader(file));
         String currentLine = br.readLine();
         Program program = new Program();
