@@ -1,6 +1,6 @@
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class Instruction {
@@ -29,8 +29,12 @@ public class Instruction {
             m.setAccessingFile(false);
         System.out.println("semsignal");
     }
-    public void print(String s){
-        System.out.println(s);
+    public void print(String s, Program p){
+        for(Variable v : p.getVariables()){
+            if(v.name.equals(s)){
+                System.out.println(v.value);
+            }
+        }
     }
     public void writeFile(String fileName ,String data, Program p) throws IOException{
         for(Variable v : p.getVariables()){
@@ -61,10 +65,12 @@ public class Instruction {
             }
         }
     }
-    public void assign(String s, Object o, Program p){
+    public void assign(String s, Object o, Program p) throws Exception{
         Object x;
         if(o instanceof Integer){
             x = (int)o;
+            Variable v = new Variable(s, x);
+            p.getVariables().add(v);
         }
         else if(o.toString().equals("input")){
             Scanner sc = new Scanner(System.in);
@@ -76,14 +82,33 @@ public class Instruction {
             }else{
                 x = x.toString();
             }
-        }else{
-            x = o.toString();
+            Variable v = new Variable(s, x);
+            p.getVariables().add(v);
         }
-        Variable v = new Variable(s, x);
-        p.getVariables().add(v);
+        else if(o.toString().equals("readFile")){
+            Boolean flag = false;
+            x = "error";
+            for(Variable z : p.getVariables()){
+                if(z.name.equals(parameters.get(3))){
+                    x = readFile(z.value.toString());
+                    flag = true;
+                    
+                }
+            }
+            if(flag){
+                Variable v = new Variable(s, x);
+                p.getVariables().add(v);
+            }
+        }
+        else{
+            x = o.toString();
+            Variable v = new Variable(s, x);
+            p.getVariables().add(v);
+        }
     }
-    public void sysCall(OpSystem os){
-        Scheduler sch = new Scheduler();
-        os.programs.get(0).instructions.get(0).parameters.get(0);
+    public static String readFile(String fileName)throws Exception{
+        String data = "";
+        data = new String(Files.readAllBytes(Paths.get(fileName)));
+        return data;
     }
 }

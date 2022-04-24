@@ -4,14 +4,14 @@ public class Interpeter{
 
     //static Program program = new Program();
     
-    public static void readFile(String fileName, OpSystem os) throws IOException{
+    public static void readProgram(String fileName, OpSystem os, Mutex m, Scheduler sc) throws IOException{
         File file = new File(fileName);
         BufferedReader br = new BufferedReader(new FileReader(file));
         String currentLine = br.readLine();
         Program program = new Program();
 
         while(currentLine != null){
-            Instruction instruction = new Instruction(new Mutex());
+            Instruction instruction = new Instruction(m);
             String[] content = currentLine.split(" ");
             for(String s : content){
                 instruction.parameters.add(s);
@@ -22,6 +22,7 @@ public class Interpeter{
         }
         br.close();
         os.programs.add(program);
+        sc.getReadyQueue().add(program);
     }
     // public static void main(String[] args) throws IOException {
     //     File file = new File("Program_2.txt");
