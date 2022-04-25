@@ -5,30 +5,11 @@ import java.util.*;
 
 public class Instruction {
     ArrayList<String> parameters;
-    Mutex m;
-    public Instruction(Mutex m){
-        this.m = m;
+    public Instruction(){
         parameters = new ArrayList<String>();
     }
 
-    public void semWait(String s){
-        if(s.equals("userInput"))
-            m.setUserInput(true);
-        else if(s.equals("userOutput"))
-            m.setUserOutput(true);
-        else
-            m.setAccessingFile(true);
-        System.out.println("semwait");
-    }
-    public void semSignal(String s){
-        if(s.equals("userInput"))
-            m.setUserInput(false);
-        else if(s.equals("userOutput"))
-            m.setUserOutput(false);
-        else
-            m.setAccessingFile(false);
-        System.out.println("semsignal");
-    }
+    
     public void print(String s, Program p){
         for(Variable v : p.getVariables()){
             if(v.name.equals(s)){

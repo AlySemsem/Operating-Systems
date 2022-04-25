@@ -4,21 +4,24 @@ public class Mutex {
     private boolean accessingFile;
     private boolean userInput;
     private boolean userOutput;
-    private LinkedList<Instruction> accessingFileQueue;
-    private LinkedList<Instruction> userInputQueue;
-    private LinkedList<Instruction> userOutputQueue;
+    private LinkedList<Program> accessingFileQueue;
+    private LinkedList<Program> userInputQueue;
+    private LinkedList<Program> userOutputQueue;
     public Mutex(){
         accessingFile = false;
         userInput = false;
         userOutput = false;
+        accessingFileQueue = new LinkedList<Program>();
+        userInputQueue  = new LinkedList<Program>();
+        userOutputQueue  = new LinkedList<Program>();
     }
-    public LinkedList<Instruction> getAccessingFileQueue() {
+    public LinkedList<Program> getAccessingFileQueue() {
         return accessingFileQueue;
     }
-    public LinkedList<Instruction> getUserInputQueue() {
+    public LinkedList<Program> getUserInputQueue() {
         return userInputQueue;
     }
-    public LinkedList<Instruction> getUserOutputQueue() {
+    public LinkedList<Program> getUserOutputQueue() {
         return userOutputQueue;
     }
     public boolean isAccessingFile() {
