@@ -7,9 +7,14 @@ public class Program {
     private Boolean output = false;
     private Boolean file = false;
     private int timeAdded;
-    public Program(){
+    private String name;
+
+
+
+    public Program(String name){
         variables = new ArrayList<Variable>();
         instructions = new ArrayList<Instruction>();
+        this.name = name;
     }
 
 
@@ -50,5 +55,8 @@ public class Program {
     public void setFile(Boolean file) {
         this.file = file;
     }
-    
+    @Override
+    public String toString() {
+        return name;
+    }
 }

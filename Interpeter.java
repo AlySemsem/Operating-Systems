@@ -4,11 +4,11 @@ public class Interpeter{
 
     //static Program program = new Program();
     
-    public static void readProgram(String fileName, OpSystem os, Mutex m, Scheduler sc, int t) throws IOException{
+    public static void readProgram(String fileName, Mutex m, Scheduler sc, int t) throws IOException{
         File file = new File(fileName);
         BufferedReader br = new BufferedReader(new FileReader(file));
         String currentLine = br.readLine();
-        Program program = new Program();
+        Program program = new Program(fileName);
 
         while(currentLine != null){
             Instruction instruction = new Instruction();
@@ -22,7 +22,6 @@ public class Interpeter{
         }
         br.close();
         program.setTimeAdded(t);
-        os.programs.add(program);
         sc.getPrograms().add(program);
     }
 }

@@ -137,26 +137,27 @@ public class Scheduler {
 
     public void printQueues(){
         System.out.println("********");
+        System.out.println("At time " + clock);
         System.out.println("Ready Queue:");
         for(Program p : readyQueue){
-            System.out.println("Program that arrived at time " + p.getTimeAdded());
+            System.out.println(p);
         }
         System.out.println("Blocked Queue:");
         for(Program p : blockedQueue){
-            System.out.println("Program that arrived at time " + p.getTimeAdded());
+            System.out.println(p);
         }
         System.out.println("********");
     }
-    public void runReadyQueue(Program e){
+    public void runReadyQueue(Program p){
         System.out.println("___________________");
-        System.out.println("Program that arrived at " + e.getTimeAdded() + " is running.");
+        System.out.println(p + " is running.");
         for(int i = 0; i < timeSlice; i++){
             System.out.println("time " + clock);
-            if(e.instructions.isEmpty()){
+            if(p.instructions.isEmpty()){
                 continue;
             }
             try {
-                if(!executeInstruction(e)){
+                if(!executeInstruction(p)){
                     printQueues();
                     break;
                 }
@@ -171,11 +172,11 @@ public class Scheduler {
                 }
             }
         }
-        if(blockedQueue.contains(e)){
+        if(blockedQueue.contains(p)){
             return;
         }
-        if(!e.instructions.isEmpty()){
-            readyQueue.add(e);
+        if(!p.instructions.isEmpty()){
+            readyQueue.add(p);
         }
         else{
             System.out.println("Program Finished Execution.");
