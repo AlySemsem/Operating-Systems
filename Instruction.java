@@ -13,11 +13,12 @@ public class Instruction {
     public void print(String s, Program p){
         for(Variable v : p.getVariables()){
             if(v.name.equals(s)){
-                System.out.println(v.value);
+                System.out.println("Print:  " + v.value);
             }
         }
     }
     public void writeFile(String fileName ,String data, Program p) throws IOException{
+        System.out.println("Writing a new file.");
         for(Variable v : p.getVariables()){
             if(v.name.equals(fileName)){
                 File file = new File((String) v.value);
@@ -31,6 +32,7 @@ public class Instruction {
         }
     }
     public void printFromTo(String x, String y, Program p){
+        System.out.println("Printing from " + x + " to " + y);
         for(Variable v : p.getVariables()){
             if(v.name.equals(x)){
                 int a = (int) v.value;
@@ -47,6 +49,7 @@ public class Instruction {
         }
     }
     public void assign(String s, Object o, Program p) throws Exception{
+        System.out.println("Assign " + s);
         Object x;
         if(o instanceof Integer){
             x = (int)o;
@@ -88,6 +91,7 @@ public class Instruction {
         }
     }
     public static String readFile(String fileName)throws Exception{
+        System.out.println("Reading a file.");
         String data = "";
         data = new String(Files.readAllBytes(Paths.get(fileName)));
         return data;

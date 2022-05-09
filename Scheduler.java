@@ -8,6 +8,7 @@ public class Scheduler {
     private LinkedList<Program> blockedQueue;
     private int timeSlice = 2;
     private int clock = 0;
+    private Scanner sc;
     Mutex m;
     public Scheduler(Mutex m){
         readyQueue = new LinkedList<Program>();
@@ -15,34 +16,33 @@ public class Scheduler {
         programs = new ArrayList<Program>();
         sortedPrograms = new ArrayList<Program>();
         this.m = m;
+        sc = new Scanner(System.in);
     }
     public void run() throws Exception{
-        for(int i = 0; i < 10; i++){
+        for(int i = 0; i < 1000; i++){
             for(Program p : programs){
                 if(p.getTimeAdded() == i){
                     sortedPrograms.add(p);
                 }
             }
         }
-        while(true){
+        while(!programs.isEmpty()){
             for(Program p : sortedPrograms){
                 if(p.getTimeAdded() == clock){
                     readyQueue.add(p);
                 }
             }
             Program e;
-            for(Program p : sortedPrograms){
-                if(readyQueue.contains(p)){
-                    printQueues();
-                    e = readyQueue.removeFirst();
-                    runReadyQueue(e);
-                }
-                else if(blockedQueue.contains(p)){
-                    printQueues();
-                    e = blockedQueue.removeFirst();
-                    runBlockedQueue(e);
+            while(!readyQueue.isEmpty()){
+                for(Program p : sortedPrograms){
+                    if(readyQueue.contains(p)){
+                        printQueues();
+                        e = readyQueue.removeFirst();
+                        runReadyQueue(e);
+                    }
                 }
             }
+            clock++;
         }
     }
     public Boolean executeInstruction(Program p) throws Exception{
@@ -61,6 +61,13 @@ public class Scheduler {
             return true;
         }
         System.out.println("Failed to aquire mutex. Process entered blocked queue.");
+        clock++;
+        sc.nextLine();
+        for(Program q : sortedPrograms){
+            if(q.getTimeAdded() == clock){
+                readyQueue.add(q);
+            }
+        }
         return false;
     }
 
@@ -117,32 +124,47 @@ public class Scheduler {
                 blockedQueue.add(p);
             }
         }
-        System.out.println("semwait");
+        System.out.println("semwait " + s);
     }
     public void semSignal(String s, Program p){
         if(s.equals("userInput")){
             m.setUserInput(false);
             p.setInput(false);
+            for(Program x : m.getUserInputQueue()){
+                blockedQueue.remove(x);
+                readyQueue.add(x);
+            }
+            m.getUserInputQueue().clear();
         }
         else if(s.equals("userOutput")){
             m.setUserOutput(false);
             p.setOutput(false);
+            for(Program x : m.getUserOutputQueue()){
+                blockedQueue.remove(x);
+                readyQueue.add(x);
+            }
+            m.getUserOutputQueue().clear();
         }
         else{
             m.setAccessingFile(false);
             p.setFile(false);
+            for(Program x : m.getAccessingFileQueue()){
+                blockedQueue.remove(x);
+                readyQueue.add(x);
+            }
+            m.getAccessingFileQueue().clear();
         }
-        System.out.println("semsignal");
+        System.out.println("semsignal " + s);
     }
 
     public void printQueues(){
         System.out.println("********");
         System.out.println("At time " + clock);
-        System.out.println("Ready Queue:");
+        System.out.println("#Ready Queue:");
         for(Program p : readyQueue){
             System.out.println(p);
         }
-        System.out.println("Blocked Queue:");
+        System.out.println("#Blocked Queue:");
         for(Program p : blockedQueue){
             System.out.println(p);
         }
@@ -152,7 +174,7 @@ public class Scheduler {
         System.out.println("___________________");
         System.out.println(p + " is running.");
         for(int i = 0; i < timeSlice; i++){
-            System.out.println("time " + clock);
+            System.out.println("-time " + clock);
             if(p.instructions.isEmpty()){
                 continue;
             }
@@ -165,6 +187,7 @@ public class Scheduler {
                 e1.printStackTrace();
             }
             clock++;
+            sc.nextLine();
             for(Program q : sortedPrograms){
                 if(q.getTimeAdded() == clock){
                     readyQueue.add(q);
@@ -177,40 +200,15 @@ public class Scheduler {
         }
         if(!p.instructions.isEmpty()){
             readyQueue.add(p);
+            printQueues();
         }
         else{
             System.out.println("Program Finished Execution.");
+            programs.remove(p);
             printQueues();
         }
     }
-    public void runBlockedQueue(Program e){
-        System.out.println("___________________");
-        System.out.println("Program that arrived at " + e.getTimeAdded() + " is running.");
-        for(int i = 0; i < timeSlice; i++){
-            System.out.println("time " + clock);
-            if(e.instructions.isEmpty()){
-                continue;
-            }
-            try {
-                executeInstruction(e);
-            } catch (Exception e1) {
-                e1.printStackTrace();
-            }
-            clock++;
-            for(Program q : sortedPrograms){
-                if(q.getTimeAdded() == clock){
-                    readyQueue.add(q);
-                    printQueues();
-                }
-            }
-        }
-        if(!e.instructions.isEmpty()){
-            readyQueue.add(e);
-        }
-        else{
-            System.out.println("Program Finished Execution.");
-        }
-    }
+
 
     public void setPrograms(ArrayList<Program> programs) {
         this.programs = programs;
