@@ -1,7 +1,7 @@
 public class Main {
     public static void main(String[] args) throws Exception {
         Mutex m = new Mutex();
-        Scheduler sc = new Scheduler(m);
+        Scheduler sc = new Scheduler(m, 2);
 
         Interpeter.readProgram("Program_1.txt", m, sc, 0);        
         Interpeter.readProgram("Program_2.txt", m, sc, 1);

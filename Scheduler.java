@@ -6,16 +6,17 @@ public class Scheduler {
     private ArrayList<Program> sortedPrograms;
     private LinkedList<Program> readyQueue;
     private LinkedList<Program> blockedQueue;
-    private int timeSlice = 2;
+    private int timeSlice;
     private int clock = 0;
     private Scanner sc;
     Mutex m;
-    public Scheduler(Mutex m){
+    public Scheduler(Mutex m, int timeSlice){
         readyQueue = new LinkedList<Program>();
         blockedQueue = new LinkedList<Program>();
         programs = new ArrayList<Program>();
         sortedPrograms = new ArrayList<Program>();
         this.m = m;
+        this.timeSlice = timeSlice;
         sc = new Scanner(System.in);
     }
     public void run() throws Exception{
@@ -33,10 +34,10 @@ public class Scheduler {
                 }
             }
             Program e;
+            printQueues();
             while(!readyQueue.isEmpty()){
                 for(Program p : sortedPrograms){
                     if(readyQueue.contains(p)){
-                        printQueues();
                         e = readyQueue.removeFirst();
                         runReadyQueue(e);
                     }
@@ -45,16 +46,27 @@ public class Scheduler {
             clock++;
         }
     }
-    public Boolean executeInstruction(Program p) throws Exception{
+    public Boolean executeInstruction(Program p, int x) throws Exception{
         Instruction i = p.instructions.get(0);
         switch(i.parameters.get(0)){
             case "semWait": semWait(i.parameters.get(1), p);break;
             case "semSignal": semSignal(i.parameters.get(1), p);break;
-            case "assign": i.assign(i.parameters.get(1), i.parameters.get(2), p);break;
-            case "print": i.print(i.parameters.get(1), p);break;
-            case "printFromTo": i.printFromTo(i.parameters.get(1), i.parameters.get(2), p);break;                        
-            case "writeFile": i.writeFile(i.parameters.get(1), i.parameters.get(2), p);break;
-            case "readFile": Instruction.readFile(i.parameters.get(1));break;
+            case "assign":
+                if(i.parameters.size() < 4){
+                    SystemCall.input(i.parameters.get(1), p);
+                    p.instructions.get(0).parameters.set(0, "saveVariable");
+                    return true;
+                }
+                else {
+                    SystemCall.assignRead(i.parameters.get(3), p);
+                    p.instructions.get(0).parameters.set(0, "saveVariable");
+                    return true;
+                }
+            case "saveVariable": SystemCall.setVariable(i.parameters.get(1), p);break;
+            case "print": SystemCall.print(i.parameters.get(1), p);break;
+            case "printFromTo": SystemCall.printFromTo(i.parameters.get(1), i.parameters.get(2), p);break;                        
+            case "writeFile": SystemCall.writeFile(i.parameters.get(1), i.parameters.get(2), p);break;
+            case "readFile": SystemCall.readFile(i.parameters.get(1));break;
         }
         if(!blockedQueue.contains(p)){
             p.instructions.remove(0);
@@ -160,31 +172,56 @@ public class Scheduler {
     public void printQueues(){
         System.out.println("********");
         System.out.println("At time " + clock);
-        System.out.println("#Ready Queue:");
+        System.out.println(" ");
+        System.out.println("    #Ready Queue:");
         for(Program p : readyQueue){
-            System.out.println(p);
+            System.out.println(" " + p);
         }
-        System.out.println("#Blocked Queue:");
+        System.out.println(" ");
+        System.out.println("    #Blocked Queue:");
         for(Program p : blockedQueue){
-            System.out.println(p);
+            System.out.println(" " + p);
         }
+        System.out.println(" ");
+        System.out.println("    #User Input Queue:");
+        for(Program p : m.getUserInputQueue()){
+            System.out.println(" " + p);
+        }
+        System.out.println(" ");
+        System.out.println("    #User Output Queue:");
+        for(Program p : m.getUserOutputQueue()){
+            System.out.println(" " + p);
+        }
+        System.out.println(" ");
+        System.out.println("    #Accessing File Queue:");
+        for(Program p : m.getAccessingFileQueue()){
+            System.out.println(" " + p);
+        }
+        System.out.println(" ");
         System.out.println("********");
     }
+    
     public void runReadyQueue(Program p){
-        System.out.println("___________________");
-        System.out.println(p + " is running.");
+        System.out.println("__________________________");
+        System.out.println(p + " is executing.\n");
+        printQueues();
         for(int i = 0; i < timeSlice; i++){
             System.out.println("-time " + clock);
             if(p.instructions.isEmpty()){
                 continue;
             }
             try {
-                if(!executeInstruction(p)){
+                if(!executeInstruction(p, i)){
                     printQueues();
                     break;
                 }
             } catch (Exception e1) {
                 e1.printStackTrace();
+            }
+            if(p.instructions.isEmpty()){
+                System.out.println("\nProgram Finished Execution.");
+                programs.remove(p);
+                printQueues();
             }
             clock++;
             sc.nextLine();
@@ -200,11 +237,6 @@ public class Scheduler {
         }
         if(!p.instructions.isEmpty()){
             readyQueue.add(p);
-            printQueues();
-        }
-        else{
-            System.out.println("Program Finished Execution.");
-            programs.remove(p);
             printQueues();
         }
     }

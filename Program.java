@@ -8,8 +8,7 @@ public class Program {
     private Boolean file = false;
     private int timeAdded;
     private String name;
-
-
+    private Object temp;
 
     public Program(String name){
         variables = new ArrayList<Variable>();
@@ -17,6 +16,12 @@ public class Program {
         this.name = name;
     }
 
+    public Object getTemp() {
+        return temp;
+    }
+    public void setTemp(Object temp) {
+        this.temp = temp;
+    }
 
     public int getTimeAdded() {
         return timeAdded;

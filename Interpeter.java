@@ -1,8 +1,6 @@
 import java.io.*;
 
 public class Interpeter{
-
-    //static Program program = new Program();
     
     public static void readProgram(String fileName, Mutex m, Scheduler sc, int t) throws IOException{
         File file = new File(fileName);
