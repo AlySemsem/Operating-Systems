@@ -1,4 +1,4 @@
-public class Variable {
+public class Variable extends MemoryData{
     String name;
     Object value;
     public Variable(String name, Object value){

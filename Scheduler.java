@@ -9,6 +9,7 @@ public class Scheduler {
     private int timeSlice;
     private int clock = 0;
     private Scanner sc;
+    Memory mem;
     Mutex m;
     public Scheduler(Mutex m, int timeSlice){
         readyQueue = new LinkedList<Program>();
@@ -18,12 +19,16 @@ public class Scheduler {
         this.m = m;
         this.timeSlice = timeSlice;
         sc = new Scanner(System.in);
+        mem = new Memory();
     }
     public void run() throws Exception{
-        for(int i = 0; i < 1000; i++){
+        int x = 1;
+        for(int i = 0; i < 5; i++){
             for(Program p : programs){
                 if(p.getTimeAdded() == i){
+                    p.setId(x);
                     sortedPrograms.add(p);
+                    x++;
                 }
             }
         }
@@ -31,6 +36,7 @@ public class Scheduler {
             for(Program p : sortedPrograms){
                 if(p.getTimeAdded() == clock){
                     readyQueue.add(p);
+                    enterProcessToMemory(p);
                 }
             }
             Program e;
@@ -78,6 +84,7 @@ public class Scheduler {
         for(Program q : sortedPrograms){
             if(q.getTimeAdded() == clock){
                 readyQueue.add(q);
+                enterProcessToMemory(q);
             }
         }
         p.instructions.remove(0);
@@ -229,6 +236,7 @@ public class Scheduler {
             for(Program q : sortedPrograms){
                 if(q.getTimeAdded() == clock){
                     readyQueue.add(q);
+                    enterProcessToMemory(q);
                     printQueues();
                 }
             }
@@ -239,6 +247,21 @@ public class Scheduler {
         if(!p.instructions.isEmpty()){
             readyQueue.add(p);
             printQueues();
+        }
+    }
+    public void enterProcessToMemory(Program p){
+        String[] memoryData = mem.getM();
+        int c = 0;
+        for(String s : memoryData){
+            if(s == null){
+                break;
+            }
+            c++;
+        }
+        Memory.setMemory(mem, p, c);
+        mem.setM(memoryData);
+        for(String s : mem.getM()){
+            System.out.println(s);
         }
     }
 

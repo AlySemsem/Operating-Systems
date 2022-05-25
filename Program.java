@@ -9,12 +9,24 @@ public class Program {
     private int timeAdded;
     private String name;
     private Object temp;
+    int id;
 
     public Program(String name){
         variables = new ArrayList<Variable>();
         instructions = new ArrayList<Instruction>();
         this.name = name;
     }
+
+    
+    public int getId() {
+        return id;
+    }
+
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
 
     public Object getTemp() {
         return temp;
