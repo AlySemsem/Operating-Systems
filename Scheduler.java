@@ -80,6 +80,7 @@ public class Scheduler {
                 readyQueue.add(q);
             }
         }
+        p.instructions.remove(0);
         return false;
     }
 
@@ -142,29 +143,29 @@ public class Scheduler {
         if(s.equals("userInput")){
             m.setUserInput(false);
             p.setInput(false);
-            for(Program x : m.getUserInputQueue()){
-                blockedQueue.remove(x);
-                readyQueue.add(x);
+            if(!m.getUserInputQueue().isEmpty()){
+                readyQueue.add(blockedQueue.removeFirst());
+                m.getUserInputQueue().removeFirst();
             }
-            m.getUserInputQueue().clear();
+            
         }
         else if(s.equals("userOutput")){
             m.setUserOutput(false);
             p.setOutput(false);
-            for(Program x : m.getUserOutputQueue()){
-                blockedQueue.remove(x);
-                readyQueue.add(x);
+            if(!m.getUserOutputQueue().isEmpty()){
+                readyQueue.add(blockedQueue.removeFirst());
+                m.getUserOutputQueue().removeFirst();
             }
-            m.getUserOutputQueue().clear();
+            
         }
         else{
             m.setAccessingFile(false);
             p.setFile(false);
-            for(Program x : m.getAccessingFileQueue()){
-                blockedQueue.remove(x);
-                readyQueue.add(x);
+            if(!m.getAccessingFileQueue().isEmpty()){
+                readyQueue.add(blockedQueue.removeFirst());
+                m.getAccessingFileQueue().removeFirst();
             }
-            m.getAccessingFileQueue().clear();
+            
         }
         System.out.println("semsignal " + s);
     }
