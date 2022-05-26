@@ -10,11 +10,13 @@ public class Program {
     private String name;
     private Object temp;
     int id;
+    int state;
 
     public Program(String name){
         variables = new ArrayList<Variable>();
         instructions = new ArrayList<Instruction>();
         this.name = name;
+        state = 0;
     }
 
     

@@ -1,4 +1,4 @@
-public class PCB extends MemoryData{
+public class PCB{
     int processId;
     int processState;
     int programCounter;

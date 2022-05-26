@@ -1,4 +1,5 @@
 
+import java.io.IOException;
 import java.util.*;
 
 public class Scheduler {
@@ -36,11 +37,11 @@ public class Scheduler {
             for(Program p : sortedPrograms){
                 if(p.getTimeAdded() == clock){
                     readyQueue.add(p);
-                    enterProcessToMemory(p);
+                    newProcessPlacement(p);
                 }
             }
             Program e;
-            printQueues();
+            //printQueues();
             while(!readyQueue.isEmpty()){
                 for(Program p : sortedPrograms){
                     if(readyQueue.contains(p)){
@@ -68,7 +69,10 @@ public class Scheduler {
                     p.instructions.get(0).parameters.set(0, "saveVariable");
                     return true;
                 }
-            case "saveVariable": SystemCall.setVariable(i.parameters.get(1), p);break;
+            case "saveVariable": SystemCall.setVariable(i.parameters.get(1), p);
+                int y = programs.indexOf(p);
+                Memory.updateVariablesInMemory(mem, programs.get(y));
+                printMemory(mem); break;
             case "print": SystemCall.print(i.parameters.get(1), p);break;
             case "printFromTo": SystemCall.printFromTo(i.parameters.get(1), i.parameters.get(2), p);break;                        
             case "writeFile": SystemCall.writeFile(i.parameters.get(1), i.parameters.get(2), p);break;
@@ -84,7 +88,7 @@ public class Scheduler {
         for(Program q : sortedPrograms){
             if(q.getTimeAdded() == clock){
                 readyQueue.add(q);
-                enterProcessToMemory(q);
+                newProcessPlacement(q);
             }
         }
         p.instructions.remove(0);
@@ -212,7 +216,15 @@ public class Scheduler {
     public void runReadyQueue(Program p){
         System.out.println("__________________________");
         System.out.println(p + " is executing.\n");
-        printQueues();
+        //printQueues();
+        try {
+            checkProcessLocation(p);
+            //printMemory(mem);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Memory.updateProcessState(mem, p, "1");
+        printMemory(mem);
         for(int i = 0; i < timeSlice; i++){
             System.out.println("-time " + clock);
             if(p.instructions.isEmpty()){
@@ -220,7 +232,7 @@ public class Scheduler {
             }
             try {
                 if(!executeInstruction(p, i)){
-                    printQueues();
+                    //printQueues();
                     break;
                 }
             } catch (Exception e1) {
@@ -229,42 +241,81 @@ public class Scheduler {
             if(p.instructions.isEmpty()){
                 System.out.println("\nProgram Finished Execution.");
                 programs.remove(p);
-                printQueues();
+                //printQueues();
             }
             clock++;
             sc.nextLine();
             for(Program q : sortedPrograms){
                 if(q.getTimeAdded() == clock){
                     readyQueue.add(q);
-                    enterProcessToMemory(q);
-                    printQueues();
+                    newProcessPlacement(q);
+                    //printQueues();
                 }
             }
         }
+        Memory.updateProcessState(mem, p, "0");
         if(blockedQueue.contains(p)){
             return;
         }
         if(!p.instructions.isEmpty()){
             readyQueue.add(p);
-            printQueues();
+            //printQueues();
         }
     }
     public void enterProcessToMemory(Program p){
         String[] memoryData = mem.getM();
-        int c = 0;
+        int lowerBoundry = 0;
         for(String s : memoryData){
             if(s == null){
                 break;
             }
-            c++;
+            lowerBoundry++;
         }
-        Memory.setMemory(mem, p, c);
-        mem.setM(memoryData);
+        int i = programs.indexOf(p);
+        Memory.setMemory(mem, programs.get(i), lowerBoundry);
+        //printMemory(mem);
+    }
+
+    public static void printMemory(Memory mem){
         for(String s : mem.getM()){
             System.out.println(s);
         }
     }
 
+    public void checkProcessLocation(Program p) throws IOException{
+        String id = Integer.toString(p.id);
+        if(Disk.checkIdInDisk(id)){
+            int i = programs.indexOf(p);
+            enterProcessToMemory(programs.get(i));
+            Disk.diskProcesses.remove(p.id);
+            Disk.writeToDisk();
+        }
+    }
+
+    public void newProcessPlacement(Program p){
+        String[] memoryData = mem.getM();
+        int lowerBoundry = 0;
+        for(String s : memoryData){
+            if(s == null){
+                break;
+            }
+            lowerBoundry++;
+        }
+        int upperBoundry = lowerBoundry + p.instructions.size() + 6;
+        int[] boundries = {lowerBoundry, upperBoundry};
+        if(upperBoundry >= 40 || mem.getM()[upperBoundry] != null){
+            PCB pcb = new PCB(p.id, p.state, p.instructions.size(), boundries);
+            Disk.diskProcesses.put(p.id, mem.setDataForDisk(pcb, p));
+            try {
+                Disk.writeToDisk();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        else{
+            enterProcessToMemory(p);
+        }
+    }
 
     public void setPrograms(ArrayList<Program> programs) {
         this.programs = programs;

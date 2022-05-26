@@ -8,5 +8,7 @@ public class Main {
         Interpeter.readProgram("Program_3.txt", m, sc, 4);
         sc.run();
 
+        //Disk disk = new Disk();
+        //disk.writeToDisk();
     }
 }
