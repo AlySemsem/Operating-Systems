@@ -1,6 +1,8 @@
 import java.io.*;
 import java.util.ArrayList;
 
+import javax.swing.text.AbstractDocument.Content;
+
 public class Memory {
     String[] m;
     public Memory(){
@@ -96,6 +98,7 @@ public class Memory {
 
     public static void removeProcessFromMemory(Memory m){
         int processIdLocation = getProcessIdFromMemory(m);
+        String id = m.getM()[processIdLocation].split(" ")[2];
         String boundries = m.getM()[processIdLocation+3];
         String[] memoryBoundries = boundries.split(" ");
         int lowerBoundry = Integer.parseInt(memoryBoundries[2]);
@@ -111,6 +114,7 @@ public class Memory {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println("Process with ID " + id + " has been placed in disk.");
     }
 
     public static void updateVariablesInMemory(Memory m, Program p){
@@ -130,6 +134,33 @@ public class Memory {
     public static void updateProcessState(Memory m, Program p, String state){
         int processIdLocation = getProcessIdFromMemory(m, p.id);
         m.getM()[processIdLocation+1] = "Process State: " + state;
+    }
+    public static void swap(Memory m){
+        for(int i = 0; i < 40; i++){
+            if(m.getM()[i] == null) continue; 
+            String[] content = m.getM()[i].split(" ");
+            if(content.length == 3 && content[1].equals("State:")){
+                if(content[2].equals("0")){
+                    String id = m.getM()[i - 1].split(" ")[2];
+                    System.out.println("Process with ID " + id + " has been placed in disk.");
+                    String[] boundries = m.getM()[i + 2].split(" ");
+                    int lowerBoundry = Integer.parseInt(boundries[2]);
+                    int upperBoundry = Integer.parseInt(boundries[4]);
+                    ArrayList<String> processToDisk = new ArrayList<String>();
+                    for(int j = lowerBoundry; j <= upperBoundry; j++){
+                        processToDisk.add(m.getM()[j]);
+                        m.getM()[j] = null;
+                    }
+                    Disk.diskProcesses.put(Integer.parseInt(processToDisk.get(0).split(" ")[2]), processToDisk);
+                    try {
+                        Disk.writeToDisk();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    return;
+                }
+            }
+        }
     }
 
     public String[] getM() {

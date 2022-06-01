@@ -10,6 +10,7 @@ public class Scheduler {
     private int timeSlice;
     private int clock = 0;
     private Scanner sc;
+    private ArrayList<Program> memoryPrograms;
     Memory mem;
     Mutex m;
     public Scheduler(Mutex m, int timeSlice){
@@ -17,6 +18,7 @@ public class Scheduler {
         blockedQueue = new LinkedList<Program>();
         programs = new ArrayList<Program>();
         sortedPrograms = new ArrayList<Program>();
+        memoryPrograms = new ArrayList<Program>();
         this.m = m;
         this.timeSlice = timeSlice;
         sc = new Scanner(System.in);
@@ -29,6 +31,7 @@ public class Scheduler {
                 if(p.getTimeAdded() == i){
                     p.setId(x);
                     sortedPrograms.add(p);
+                    memoryPrograms.add(p);
                     x++;
                 }
             }
@@ -72,7 +75,7 @@ public class Scheduler {
             case "saveVariable": SystemCall.setVariable(i.parameters.get(1), p);
                 int y = programs.indexOf(p);
                 Memory.updateVariablesInMemory(mem, programs.get(y));
-                printMemory(mem); break;
+                break;
             case "print": SystemCall.print(i.parameters.get(1), p);break;
             case "printFromTo": SystemCall.printFromTo(i.parameters.get(1), i.parameters.get(2), p);break;                        
             case "writeFile": SystemCall.writeFile(i.parameters.get(1), i.parameters.get(2), p);break;
@@ -214,19 +217,24 @@ public class Scheduler {
     }
     
     public void runReadyQueue(Program p){
+        Program memProgram = new Program("");
+        for(Program p2 : memoryPrograms){
+            if(p2.id == p.id){
+                memProgram = p2;
+            }
+        }
         System.out.println("__________________________");
         System.out.println(p + " is executing.\n");
         //printQueues();
         try {
-            checkProcessLocation(p);
-            //printMemory(mem);
+            checkProcessLocation(memProgram);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Memory.updateProcessState(mem, p, "1");
-        printMemory(mem);
+        Memory.updateProcessState(mem, memProgram, "1");
         for(int i = 0; i < timeSlice; i++){
             System.out.println("-time " + clock);
+            printMemory(mem);
             if(p.instructions.isEmpty()){
                 continue;
             }
@@ -253,7 +261,7 @@ public class Scheduler {
                 }
             }
         }
-        Memory.updateProcessState(mem, p, "0");
+        Memory.updateProcessState(mem, memProgram, "0");
         if(blockedQueue.contains(p)){
             return;
         }
@@ -271,9 +279,9 @@ public class Scheduler {
             }
             lowerBoundry++;
         }
-        int i = programs.indexOf(p);
-        Memory.setMemory(mem, programs.get(i), lowerBoundry);
-        //printMemory(mem);
+        int i = memoryPrograms.indexOf(p);
+        Memory.setMemory(mem, memoryPrograms.get(i), lowerBoundry);
+        System.out.println("Process with ID " + p.id + " has been placed in memory.");
     }
 
     public static void printMemory(Memory mem){
@@ -285,8 +293,8 @@ public class Scheduler {
     public void checkProcessLocation(Program p) throws IOException{
         String id = Integer.toString(p.id);
         if(Disk.checkIdInDisk(id)){
-            int i = programs.indexOf(p);
-            enterProcessToMemory(programs.get(i));
+            int i = memoryPrograms.indexOf(p);
+            enterProcessToMemory(memoryPrograms.get(i));
             Disk.diskProcesses.remove(p.id);
             Disk.writeToDisk();
         }
@@ -302,15 +310,9 @@ public class Scheduler {
             lowerBoundry++;
         }
         int upperBoundry = lowerBoundry + p.instructions.size() + 6;
-        int[] boundries = {lowerBoundry, upperBoundry};
         if(upperBoundry >= 40 || mem.getM()[upperBoundry] != null){
-            PCB pcb = new PCB(p.id, p.state, p.instructions.size(), boundries);
-            Disk.diskProcesses.put(p.id, mem.setDataForDisk(pcb, p));
-            try {
-                Disk.writeToDisk();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            Memory.swap(mem);
+            newProcessPlacement(p);
         }
         else{
             enterProcessToMemory(p);
