@@ -1,8 +1,6 @@
 import java.io.*;
 import java.util.ArrayList;
 
-import javax.swing.text.AbstractDocument.Content;
-
 public class Memory {
     String[] m;
     public Memory(){

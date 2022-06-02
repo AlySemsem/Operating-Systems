@@ -73,8 +73,8 @@ public class Scheduler {
                     return true;
                 }
             case "saveVariable": SystemCall.setVariable(i.parameters.get(1), p);
-                int y = programs.indexOf(p);
-                Memory.updateVariablesInMemory(mem, programs.get(y));
+                int y = memoryPrograms.indexOf(p);
+                Memory.updateVariablesInMemory(mem, memoryPrograms.get(y));
                 break;
             case "print": SystemCall.print(i.parameters.get(1), p);break;
             case "printFromTo": SystemCall.printFromTo(i.parameters.get(1), i.parameters.get(2), p);break;                        
@@ -218,9 +218,9 @@ public class Scheduler {
     
     public void runReadyQueue(Program p){
         Program memProgram = new Program("");
-        for(Program p2 : memoryPrograms){
-            if(p2.id == p.id){
-                memProgram = p2;
+        for(Program program : memoryPrograms){
+            if(program.id == p.id){
+                memProgram = program;
             }
         }
         System.out.println("__________________________");
